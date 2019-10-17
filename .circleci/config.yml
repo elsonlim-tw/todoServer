@@ -22,7 +22,7 @@ jobs:
           name: unit-test
           command: "npm test"
 
-          deploy:
+  deploy:
     docker:
       - image: buildpack-deps:trusty
     steps:
@@ -42,4 +42,3 @@ workflows:
           filters:
             branches:
               only: master
-
