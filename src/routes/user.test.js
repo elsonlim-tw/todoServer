@@ -51,40 +51,49 @@ describe("user router", () => {
   });
 
   describe("/users/create", () => {
-    it("POST should create a user with password as bcrypt digest", async () => {
-      const user = {
-        username: "john",
-        password: "password",
-      };
-      await createUser(user);
+    describe("POST", () => {
+      it("should create a user with password as bcrypt digest", async () => {
+        const user = {
+          username: "john",
+          password: "password",
+        };
+        await createUser(user);
 
-      const userFmDB = await usersCollection.findOne({
-        username: user.username,
-      });
-      expect(userFmDB.username).toBe(user.username);
-      expect(userFmDB.password).not.toBe(user.password);
-      expect(userFmDB.password).toMatch(/\$2b\$10\$.+/);
-      expect(userFmDB.password).toHaveLength(60);
-    });
-
-    it("POST, different user with same password should have different digest", async () => {
-      const password = "password";
-      const userOne = { username: "john", password };
-      const userTwo = { username: "mary", password };
-
-      await createUser(userOne);
-      await createUser(userTwo);
-
-      const userOneFmDb = await usersCollection.findOne({
-        username: userOne.username,
-      });
-      const userTwoFmDb = await usersCollection.findOne({
-        username: userTwo.username,
+        const userFmDB = await usersCollection.findOne({
+          username: user.username,
+        });
+        expect(userFmDB.username).toBe(user.username);
+        expect(userFmDB.password).not.toBe(user.password);
+        expect(userFmDB.password).toMatch(/\$2b\$10\$.+/);
+        expect(userFmDB.password).toHaveLength(60);
       });
 
-      expect(userOneFmDb.password).toHaveLength(60);
-      expect(userTwoFmDb.password).toHaveLength(60);
-      expect(userOneFmDb.password).not.toBe(userTwoFmDb.password);
+      it("different user with same password should have different digest", async () => {
+        const password = "password";
+        const userOne = { username: "john", password };
+        const userTwo = { username: "mary", password };
+
+        await createUser(userOne);
+        await createUser(userTwo);
+
+        const userOneFmDb = await usersCollection.findOne({
+          username: userOne.username,
+        });
+        const userTwoFmDb = await usersCollection.findOne({
+          username: userTwo.username,
+        });
+
+        expect(userOneFmDb.password).toHaveLength(60);
+        expect(userTwoFmDb.password).toHaveLength(60);
+        expect(userOneFmDb.password).not.toBe(userTwoFmDb.password);
+      });
+
+      it("should return jwt token", async () => {
+        const userOne = { username: "john", password: "password" };
+        const response = await createUser(userOne);
+        expect(response.status).toBe(200);
+        expect(response.body.jwt).toEqual(expect.any(String));
+      });
     });
   });
 
@@ -113,7 +122,7 @@ describe("user router", () => {
       expect(response.status).toBe(401);
     });
 
-    it("should return 200 if password match", async () => {
+    it("should return 200 with jwt if password match", async () => {
       const user = {
         username: "john",
         password: "password",
@@ -123,6 +132,7 @@ describe("user router", () => {
       const response = await loginUser(user);
 
       expect(response.status).toBe(200);
+      expect(response.body.jwt).toEqual(expect.any(String));
     });
   });
 });

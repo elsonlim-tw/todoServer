@@ -1,5 +1,6 @@
 const { Schema, model } = require("mongoose");
 const bcrypt = require("bcrypt");
+const jwtHelper = require("../utils/jwtHelper");
 
 const UserSchema = new Schema({
   username: {
@@ -28,6 +29,11 @@ UserSchema.pre("save", async function(next) {
 UserSchema.methods.comparePassword = async function(inputPassword) {
   const user = this;
   return await bcrypt.compare(inputPassword, user.password);
+};
+
+UserSchema.methods.generateJwt = function() {
+  const user = this;
+  return jwtHelper.generateJwt(user);
 };
 
 const userModel = model("user", UserSchema);

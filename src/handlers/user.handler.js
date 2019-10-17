@@ -11,6 +11,7 @@ module.exports.createUser = async (req, res) => {
   await user.save();
   res.json({
     username: user.username,
+    jwt: user.generateJwt(),
   });
 };
 
@@ -24,7 +25,10 @@ module.exports.login = async (req, res) => {
   }
 
   if (isUser) {
-    return res.sendStatus(200);
+    return res.json({
+      username: user.username,
+      jwt: user.generateJwt(),
+    });
   }
   res.sendStatus(401);
 };
