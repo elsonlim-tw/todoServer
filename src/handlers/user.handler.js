@@ -32,3 +32,9 @@ module.exports.login = async (req, res) => {
   }
   res.sendStatus(401);
 };
+
+module.exports.getUserName = async (req, res) => {
+  res.json({
+    username: req.username,
+  });
+};

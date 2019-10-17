@@ -15,3 +15,12 @@ module.exports.generateJwt = user => {
     },
   );
 };
+
+module.exports.getUserNameFromToken = token => {
+  try {
+    const userInfo = jwt.verify(token, jwtSecret);
+    return userInfo.user;
+  } catch (error) {
+    throw new Error("invalid token");
+  }
+};

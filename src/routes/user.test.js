@@ -45,11 +45,6 @@ describe("user router", () => {
     await db.dropDatabase();
   });
 
-  it("/users", async () => {
-    const response = await request(app).get("/users");
-    expect(response.text).toBe("OK");
-  });
-
   describe("/users/create", () => {
     describe("POST", () => {
       it("should create a user with password as bcrypt digest", async () => {
@@ -133,6 +128,42 @@ describe("user router", () => {
 
       expect(response.status).toBe(200);
       expect(response.body.jwt).toEqual(expect.any(String));
+    });
+  });
+
+  describe("/users", () => {
+    it("/should return 401 when no jwt passed in", async () => {
+      const response = await request(app).get("/users");
+      expect(response.status).toBe(401);
+    });
+
+    it("Get should return 401 if pass in invalidJwt", async () => {
+      const user = {
+        username: "john",
+        password: "password",
+      };
+
+      const createRes = await createUser(user);
+      const getUserRes = await request(app)
+        .get("/users")
+        .set("authorization", `Bearer ${createRes.body.jwt + 1}`);
+
+      expect(getUserRes.status).toBe(401);
+    });
+
+    it("Get should return user name if have the right jwt token", async () => {
+      const user = {
+        username: "john",
+        password: "password",
+      };
+
+      const createRes = await createUser(user);
+      const getUserRes = await request(app)
+        .get("/users")
+        .set("authorization", `Bearer ${createRes.body.jwt}`);
+
+      expect(getUserRes.status).toBe(200);
+      expect(getUserRes.body.username).toBe(user.username);
     });
   });
 });
