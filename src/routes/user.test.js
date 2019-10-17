@@ -25,6 +25,7 @@ describe("user router", () => {
     const dbParams = global.__MONGO_URI__.split("/");
     const dbName = dbParams[dbParams.length - 1];
     connection = await MongoClient.connect(global.__MONGO_URI__, {
+      useUnifiedTopology: true,
       useNewUrlParser: true,
     });
     db = await connection.db(dbName);
@@ -37,8 +38,11 @@ describe("user router", () => {
   });
 
   beforeEach(async () => {
-    await db.dropDatabase();
     usersCollection = await db.collection("users");
+  });
+
+  afterEach(async () => {
+    await db.dropDatabase();
   });
 
   it("/users", async () => {

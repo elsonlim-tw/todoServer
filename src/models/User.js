@@ -17,6 +17,7 @@ const SALT_ROUND = 10;
 UserSchema.pre("save", async function(next) {
   const user = this;
 
+  /* istanbul ignore next */
   if (!user.isModified("password")) return next();
 
   const digest = await bcrypt.hash(user.password, SALT_ROUND);
