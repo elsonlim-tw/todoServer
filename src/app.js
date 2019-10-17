@@ -1,9 +1,11 @@
+require("./utils/db");
 const express = require("express");
 const userRouter = require("./routes/user");
 const morgan = require("morgan");
 
 const app = express();
 
+app.use(express.json());
 app.use(morgan("tiny"));
 
 app.use("/users", userRouter);

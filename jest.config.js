@@ -1,4 +1,6 @@
 module.exports = {
+  preset: "@shelf/jest-mongodb",
+  setupFilesAfterEnv: ["./jestSetup.js"],
   collectCoverageFrom: ["src/**/*.js", "!**/*.test.js", "!src/index.js"],
   coverageThreshold: {
     global: {

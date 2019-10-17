@@ -5,19 +5,25 @@
   "main": "index.js",
   "scripts": {
     "start": "nodemon src/index.js",
+    "start-prod": "node src/index.js",
     "test": "jest",
-    "coverage": "jest --coverage"
+    "test-w": "jest --runInBand --watchAll",
+    "coverage": "jest --coverage  --runInBand "
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "bcrypt": "^3.0.6",
     "cors": "^2.8.5",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
+    "jsonwebtoken": "^8.5.1",
+    "mongoose": "^5.7.5",
     "morgan": "^1.9.1"
   },
   "devDependencies": {
+    "@shelf/jest-mongodb": "^1.1.1",
     "jest": "^24.9.0",
     "supertest": "^4.0.2"
   }
