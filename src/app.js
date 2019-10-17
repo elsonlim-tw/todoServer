@@ -1,7 +1,10 @@
 const express = require("express");
 const userRouter = require("./routes/user");
+const morgan = require("morgan");
 
 const app = express();
+
+app.use(morgan("tiny"));
 
 app.use("/users", userRouter);
 
