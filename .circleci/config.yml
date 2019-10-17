@@ -20,7 +20,7 @@ jobs:
             - ./node_modules
       - run:
           name: unit-test
-          command: "npm test"
+          command: "npm run coverage"
 
   deploy:
     docker:
