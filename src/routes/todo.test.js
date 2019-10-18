@@ -44,6 +44,11 @@ describe("Todo", () => {
     return await post(route, { title });
   };
 
+  const createTodo = async (listId, item) => {
+    const route = `/users/${user.username}/todolists/${listId}/todos`;
+    return await post(route, { item });
+  };
+
   const getUserData = async () => {
     return await request(app)
       .get("/users/me")
@@ -69,6 +74,40 @@ describe("Todo", () => {
 
       const response = await getUserData();
       expect(response.body.todoLists).toEqual([]);
+    });
+  });
+
+  describe("/todolists/:listId/todos", () => {
+    it("POST should create new todo item", async () => {
+      const listResponse = await createTodolist("My List");
+      const todolistId = listResponse.body.todoLists[0]._id;
+
+      const createTodoResponse = await createTodo(todolistId, "Buy Milk");
+      expect(createTodoResponse.status).toBe(201);
+
+      const response = await getUserData();
+      expect(response.body.todoLists).toMatchObject([
+        { title: "My List", todos: [{ item: "Buy Milk", isDone: false }] },
+      ]);
+    });
+  });
+
+  describe("/todolists/:listId/todos/:todoId", () => {
+    it("DELETE should remove a todo item", async () => {
+      const listResponse = await createTodolist("My List");
+      const todolistId = listResponse.body.todoLists[0]._id;
+
+      const createTodoResponse = await createTodo(todolistId, "Buy Milk");
+      let response = await getUserData();
+      let todoList = response.body.todoLists[0];
+      let todoItem = todoList.todos[0];
+
+      const route = `/users/${user.username}/todolists/${todoList._id}/todos/${todoItem._id}`;
+      await deleteRoute(route);
+
+      response = await getUserData();
+      todoList = response.body.todoLists[0];
+      expect(todoList.todos).toEqual([]);
     });
   });
 });
