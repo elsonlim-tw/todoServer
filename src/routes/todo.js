@@ -49,4 +49,18 @@ router.delete("/:listId/todos/:todoId", async (req, res) => {
   res.send(204);
 });
 
+router.patch("/:listId/todos/:todoId", async (req, res) => {
+  const { listId, todoId } = req.params;
+  const { item, isDone } = req.body;
+
+  const user = await User.findOne({ username: req.username });
+  const todo = user.todoLists.id(listId).todos.id(todoId);
+  todo.item = item;
+  todo.isDone = isDone;
+
+  await user.save();
+
+  res.send(204);
+});
+
 module.exports = router;

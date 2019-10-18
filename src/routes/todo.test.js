@@ -35,8 +35,15 @@ describe("Todo", () => {
   const deleteRoute = async route => {
     return await request(app)
       .delete(route)
-      .set("Content-Type", "application/json")
       .set("authorization", `Bearer ${user.jwt}`);
+  };
+
+  const patchRoute = async (route, body) => {
+    return await request(app)
+      .patch(route)
+      .set("Content-Type", "application/json")
+      .set("authorization", `Bearer ${user.jwt}`)
+      .send(body);
   };
 
   const createTodolist = async title => {
@@ -56,6 +63,20 @@ describe("Todo", () => {
   };
 
   describe("/todolists/new", () => {
+    it("POST should return 403 if username does not match jwt", async () => {
+      await createUser({
+        username: "alice",
+        password: "password",
+      });
+      const route = `/users/alice/todolists/new`;
+      const response = await request(app)
+        .post(route)
+        .set("Content-Type", "application/json")
+        .set("authorization", `Bearer ${user.jwt}`)
+        .send({ title: "new todolist" });
+      expect(response.status).toBe(403);
+    });
+
     it("POST should create a new todolist with title", async () => {
       const title = "my first todos";
       const response = await createTodolist(title);
@@ -93,21 +114,36 @@ describe("Todo", () => {
   });
 
   describe("/todolists/:listId/todos/:todoId", () => {
-    it("DELETE should remove a todo item", async () => {
+    let route;
+
+    beforeEach(async () => {
       const listResponse = await createTodolist("My List");
       const todolistId = listResponse.body.todoLists[0]._id;
 
-      const createTodoResponse = await createTodo(todolistId, "Buy Milk");
-      let response = await getUserData();
-      let todoList = response.body.todoLists[0];
-      let todoItem = todoList.todos[0];
+      await createTodo(todolistId, "Buy Milk");
+      const response = await getUserData();
+      const todoList = response.body.todoLists[0];
+      const todoItem = todoList.todos[0];
+      route = `/users/${user.username}/todolists/${todoList._id}/todos/${todoItem._id}`;
+    });
 
-      const route = `/users/${user.username}/todolists/${todoList._id}/todos/${todoItem._id}`;
+    it("DELETE should remove a todo item", async () => {
       await deleteRoute(route);
 
-      response = await getUserData();
-      todoList = response.body.todoLists[0];
+      const response = await getUserData();
+      const todoList = response.body.todoLists[0];
       expect(todoList.todos).toEqual([]);
+    });
+
+    it("Patch should edit a todo item", async () => {
+      await patchRoute(route, { item: "new name", isDone: true });
+
+      const response = await getUserData();
+      const todo = response.body.todoLists[0].todos[0];
+      expect(todo).toMatchObject({
+        item: "new name",
+        isDone: true,
+      });
     });
   });
 });
