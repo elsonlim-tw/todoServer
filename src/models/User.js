@@ -1,6 +1,7 @@
 const { Schema, model } = require("mongoose");
 const bcrypt = require("bcrypt");
 const jwtHelper = require("../utils/jwtHelper");
+const { TodoList } = require("./TodoList");
 
 const UserSchema = new Schema({
   username: {
@@ -12,6 +13,7 @@ const UserSchema = new Schema({
     type: String,
     required: true,
   },
+  todoLists: [TodoList],
 });
 
 const SALT_ROUND = 10;

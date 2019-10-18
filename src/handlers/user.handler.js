@@ -12,6 +12,7 @@ module.exports.createUser = async (req, res) => {
   res.json({
     username: user.username,
     jwt: user.generateJwt(),
+    todoLists: user.todoLists,
   });
 };
 
@@ -28,13 +29,16 @@ module.exports.login = async (req, res) => {
     return res.json({
       username: user.username,
       jwt: user.generateJwt(),
+      todoLists: user.todoLists,
     });
   }
   res.sendStatus(401);
 };
 
-module.exports.getUserName = async (req, res) => {
+module.exports.getUserInfo = async (req, res) => {
+  const user = await User.findOne({ username: req.username });
   res.json({
-    username: req.username,
+    username: user.username,
+    todoLists: user.todoLists,
   });
 };

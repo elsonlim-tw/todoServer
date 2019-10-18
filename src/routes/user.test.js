@@ -4,9 +4,13 @@ const { MongoClient } = require("mongodb");
 const mongoose = require("mongoose");
 
 describe("user router", () => {
-  let connection;
-  let db;
   let usersCollection;
+  let db;
+
+  beforeEach(() => {
+    db = global.db;
+  });
+
   const createUser = async user => {
     return await request(app)
       .post("/users/create")
@@ -21,28 +25,8 @@ describe("user router", () => {
       .send(user);
   };
 
-  beforeAll(async () => {
-    const dbParams = global.__MONGO_URI__.split("/");
-    const dbName = dbParams[dbParams.length - 1];
-    connection = await MongoClient.connect(global.__MONGO_URI__, {
-      useUnifiedTopology: true,
-      useNewUrlParser: true,
-    });
-    db = await connection.db(dbName);
-  });
-
-  afterAll(async () => {
-    await mongoose.disconnect();
-    await connection.close();
-    await db.close();
-  });
-
   beforeEach(async () => {
     usersCollection = await db.collection("users");
-  });
-
-  afterEach(async () => {
-    await db.dropDatabase();
   });
 
   describe("/users/create", () => {
@@ -131,9 +115,9 @@ describe("user router", () => {
     });
   });
 
-  describe("/users", () => {
+  describe("/users/me", () => {
     it("/should return 401 when no jwt passed in", async () => {
-      const response = await request(app).get("/users");
+      const response = await request(app).get("/users/me");
       expect(response.status).toBe(401);
     });
 
@@ -145,7 +129,7 @@ describe("user router", () => {
 
       const createRes = await createUser(user);
       const getUserRes = await request(app)
-        .get("/users")
+        .get("/users/me")
         .set("authorization", `Bearer ${createRes.body.jwt + 1}`);
 
       expect(getUserRes.status).toBe(401);
@@ -159,7 +143,7 @@ describe("user router", () => {
 
       const createRes = await createUser(user);
       const getUserRes = await request(app)
-        .get("/users")
+        .get("/users/me")
         .set("authorization", `Bearer ${createRes.body.jwt}`);
 
       expect(getUserRes.status).toBe(200);
